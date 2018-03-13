@@ -1,0 +1,7 @@
+load("/Users/mfeldman/Dropbox/ellsworth_feldman_water_use/results/te/qtl_summary_table/te_fit_total/wet/timeseries_wet_cross.object.raw.Rdata")
+ls()
+library(qtl)
+library(funqtl)
+plot(refineqtl)
+ls()
+refqtlslod_wet_slod
