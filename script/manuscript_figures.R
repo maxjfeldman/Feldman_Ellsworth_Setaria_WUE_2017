@@ -1184,7 +1184,7 @@ draw.quintuple.venn(area1=length(total.sv_area.raw.comp_both),
                     fill=c("green","light blue", "orange", "black", "red")
 )
 
-
+dev.off()
 
 
 ## Difference traits only

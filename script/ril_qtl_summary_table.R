@@ -632,6 +632,10 @@ r.all.qtl<-rbind(r.all_total.qtl, r.all_day.qtl)
 r.uni.all.qtl<-unify_marker(r.all.qtl)
 r.cond.all.qtl<-condense_qtl(r.all.qtl)
 
+all_day.qtl<-all_day.qtl[all_day.qtl$trait != 'd13C_BP14',]
+all.qtl<-rbind(all_total.qtl, all_day.qtl)
+
+
 all.qtl.with_diff_ratio<-all.qtl
 ## Lets remove the GxE ratio QTL because they can be very noisy.
 all.qtl<-all.qtl[all.qtl$type != 'comp_ratio',]
@@ -652,7 +656,6 @@ all.qtl<-rbind(all_total.qtl, all_day.qtl)
 
 #traits_not_te<-c("gN_m2_BP14", "d13C_z_BP14", "gC_m2_BP14", "gN_m2_z_BP14", "gC_m2_z_BP14","CN_BP14", "CN_z_BP14","d13C_BP14")
 #all.qtl<-all.qtl[!all.qtl$trait %in% traits_not_te, ]
-
 
 setwd(wue_results.qtl.dir)
 
@@ -689,6 +692,6 @@ write.csv(known_qtl_markers, file="14_markers_for_fixed_model.csv", quote=F, row
 ## Save image for next step
 save.image("qtl_summary_4_qtl_trait_matrix.Rdata")
 
-
+rm(list=ls())
 
 
