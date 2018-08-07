@@ -20,6 +20,7 @@ library(VennDiagram)
 library(qtl)
 library(funqtl)
 
+setwd("/Users/mfeldman/Desktop/Feldman_Ellsworth_Setaria_WUE_2017-master/")
 
 
 ## Tester
@@ -202,14 +203,36 @@ print(y)
 
 dev.off()
 
-
 ## Figure S1
+## Lets look at the distirbution of these values
+setwd(wue_figures.supplemental.dir)
+
+
+hist(mean_ratio_sv_area$ave_ratio)
+
+max_id<-as.character(mean_ratio_sv_area[mean_ratio_sv_area$ave_ratio == max(mean_ratio_sv_area$ave_ratio),"genotype"])
+min_id<-as.character(mean_ratio_sv_area[mean_ratio_sv_area$ave_ratio == min(mean_ratio_sv_area$ave_ratio),"genotype"])
+
+## Lets make a plot of dry/wet ratio over the experiment for A10 and B100
+parents<-ratio_sv_area_long[ratio_sv_area_long$id == "A10" | ratio_sv_area_long$id == "B100",]
+p<-ggplot(data=parents, aes(x=day, y=ratio, colour=id)) + geom_line() + xlim(17,33)
+
+pdf("FIG_S2.pdf")
+## Lets make a plot of dry/wet ratio over the experiment for A10, B100, RIL_099 (max), RIL_010 (min)
+parents_max_min<-ratio_sv_area_long[ratio_sv_area_long$id == "A10" | ratio_sv_area_long$id == "B100" | ratio_sv_area_long$id == "RIL_099" | ratio_sv_area_long$id == "RIL_010",]
+colnames(parents_max_min)[c(7,9,10)]<-c("Genotype", "Ratio", "Day")
+p<-ggplot(data=parents_max_min, aes(x=Day, y=Ratio, colour=Genotype)) + geom_line() + xlim(17,33) + theme_bw() + ylab(c("Ratio (Dry/Wet)")) + xlab("Days after planting")
+print(p)
+
+dev.off()
+
+## Figure S2
 vis.figs<-vis
 vis.figs$fw.all.int = predict.lm(object = fw.all.int, newdata=vis.figs)
 
 setwd(wue_figures.supplemental.dir)
 
-pdf("FIG_S1.pdf")
+pdf("FIG_S27.pdf")
 p<-ggplot(vis.figs, aes(y=fw.all.int, x=dap_i, colour=treatment)) + geom_point(size=0.3)
 g<-p+scale_color_manual(values=c("orange", "navy")) + ylab("Fresh weight biomass (g)") + xlab("Days after planting") + theme_bw() + theme(legend.position="none", axis.text=element_text(size=20), axis.title=element_text(size=24,face="bold")) 
 q<-g + geom_hline(aes(yintercept=0), color='red', size=2, linetype="dashed") 
@@ -224,7 +247,7 @@ day15[day15$sv_water_total < 1,'sv_water_total']<-c(1)
 
 setwd(wue_figures.supplemental.dir)
 
-pdf("FIG_S2a.pdf")
+pdf("FIG_S29a.pdf")
 
 p<-ggplot(day15, aes(x=dap_i, y=sv_water_total, colour=treatment)) + geom_point(size=0.75) + ylim(-100,15000) +xlim(14.5,33) + scale_colour_manual(values = c("orange","navy")) + theme_bw()
 q<-p + xlab("Days after planting") + ylab("Biomass (mg) / total_water_added (mL)") + theme(legend.position="none")
@@ -264,7 +287,7 @@ for (g in genos) {
 
 setwd(wue_figures.supplemental.dir)
 
-pdf("FIG_S2b.pdf")
+pdf("FIG_S29b.pdf")
 
 p<-ggplot(data=day15.p, aes(x=dap_i, y=water_lost_total, colour=treatment)) + geom_line(size=2) + scale_color_manual(values=c("orange", "navy")) + ylab("Water lost (mL)") + xlab("Days after planting")
 q<-p + geom_line(data=day15.p[day15.p$treatment == 'wet',], aes(x=dap_i, y=water_lost_total.p), colour = 'light blue', size=2)
@@ -279,7 +302,7 @@ calibrate$fw.min.residual<-residuals(fw.min)
 # Make residual plot as supplemental figure
 setwd(wue_figures.supplemental.dir)
 
-pdf("FIG_S3.pdf")
+pdf("FIG_S1.pdf")
 p<-ggplot(data=calibrate, aes(x=fresh_wt,y=fw.min.residual,colour=treatment)) + geom_point(size=0.75) +  theme_bw() + scale_color_manual(values=c("orange","navy"))
 q<-p + geom_hline(aes(yintercept=0), color='red', size=2, linetype="dashed") + ylab("Residual (mg)") + xlab("Fresh weight (mg)") + theme(legend.position="none",axis.text=element_text(size=20), axis.title=element_text(size=24,face="bold")) 
 q
@@ -320,7 +343,7 @@ q<-p + ylab("Biomass (g) / Pot water volume (mL)") + xlab("Days after planting")
 
 setwd(wue_figures.supplemental.dir)
 
-pdf('FIG_S4.pdf')
+pdf('FIG_S3.pdf')
 q
 dev.off()
 
@@ -396,7 +419,7 @@ for(i in traits){
 
 setwd(wue_figures.supplemental.dir)
 
-pdf("FIG_S5.pdf")
+pdf("FIG_S28.pdf")
 traits<-unique(te_summary_stats$trait)
 for(i in traits){
   temp<-te_summary_stats[te_summary_stats$trait == i,]
@@ -528,14 +551,17 @@ for(t in treats){
 
 setwd(wue_figures.main.dir)
 
-pdf("FIG_3.pdf")
+#pdf("FIG_3.pdf")
+pdf("FIG_3_icon.pdf")
 temp2$treatment2<-paste(temp2$treatment, 2, sep="_")
 p<-ggplot(temp2, aes(x=water_lost_total, y=sv_area, color=treatment)) + geom_point()
 q<-p + theme(legend.position="none",axis.text=element_text(size=20), axis.title=element_text(size=24,face="bold"))
 x<-q + geom_segment(aes(xend = water_lost_total, yend = te_fit_total), color="red")
 y<-x + geom_point(aes(y = sv_area, color=treatment2))  
 z<-x + geom_point(aes(y = te_fit_total, color=treatment2)) + scale_color_manual(values=c("gold","orange", "blue", "navy")) 
-a <- z + theme_bw() + xlab("Water lost (mL)") + ylab("Plant area (pixel)") + ggtitle("30 days after planting") + theme(legend.position="none",axis.text=element_text(size=20), axis.title=element_text(size=24,face="bold"),plot.title = element_text(size = 24, face = "bold"))
+#a <- z + theme_bw() + xlab("Water lost (mL)") + ylab("Plant area (pixel)") + ggtitle("30 days after planting") + theme(legend.position="none",axis.text=element_text(size=20), axis.title=element_text(size=24,face="bold"),plot.title = element_text(size = 24, face = "bold"))
+a <- z + theme_bw() + xlab("Water lost (mL)") + ylab("Plant area (pixel)") +  theme(legend.position="none",axis.text=element_text(size=20), axis.title=element_text(size=24,face="bold"),plot.title = element_text(size = 24, face = "bold"))
+
 print(a)
 
 dev.off()
@@ -560,24 +586,24 @@ dev.off()
 setwd(wue_figures.supplemental.dir)
 
 ## Plot of the correlation between cumulative WUE ratio and sv_area/biomass
-pdf("FIG_S6.pdf")
-p<-ggplot(te_model, aes(x=sv_area, y=wue_total, colour=treatment)) + geom_point(size=0.3) + facet_wrap(~dap_i) + scale_color_manual(values=c("orange", "navy")) + theme_bw() + xlab("Plant size (px)") + ylab("WUE Ratio")+ theme(legend.position="none")
+pdf("FIG_S4.pdf")
+p<-ggplot(te_model, aes(x=sv_area, y=wue_total, colour=treatment)) + geom_point(size=0.3) + facet_wrap(~dap_i) + scale_color_manual(values=c("orange", "navy")) + theme_bw() + xlab("Plant size (px)") + ylab("WUE Ratio")+ theme(legend.position="none",axis.text.x = element_text(angle = 90))
 print(p)
 dev.off()
 
 setwd(wue_figures.supplemental.dir)
 
 ## Plot of the correlation between daily/rate WUE ratio and sv_area/biomass
-pdf("FIG_S7.pdf")
-p<-ggplot(te_model, aes(x=sv_area_day, y=wue_day, colour=treatment)) + geom_point(size=0.3) + facet_wrap(~dap_i) + scale_color_manual(values=c("orange", "navy")) + theme_bw() + xlab("Plant size (px)") + ylab("WUE Ratio")+ theme(legend.position="none")
+pdf("FIG_S5.pdf")
+p<-ggplot(te_model, aes(x=sv_area_day, y=wue_day, colour=treatment)) + geom_point(size=0.3) + facet_wrap(~dap_i) + scale_color_manual(values=c("orange", "navy")) + theme_bw() + xlab("Plant size (px)") + ylab("WUE Ratio")+ theme(legend.position="none",axis.text.x = element_text(angle = 90))
 print(p)
 dev.off()
 
 setwd(wue_figures.supplemental.dir)
 
 ## Residual plot of cumulative TE 
-pdf("FIG_S8.pdf")
-p<-ggplot(te_model, aes(x=te_fit_total, y=te_residual_total, colour=treatment)) + geom_point(size=0.3) + facet_wrap(~dap_i) + scale_color_manual(values=c("orange", "navy")) + theme_bw() + xlab("sv_area ~ water_use_total") + ylab("residual")+ theme(legend.position="none")
+pdf("FIG_S6.pdf")
+p<-ggplot(te_model, aes(x=te_fit_total, y=te_residual_total, colour=treatment)) + geom_point(size=0.3) + facet_wrap(~dap_i) + scale_color_manual(values=c("orange", "navy")) + theme_bw() + xlab("sv_area ~ water_use_total") + ylab("residual")+ theme(legend.position="none",axis.text.x = element_text(angle = 90))
 q<-p + geom_hline(yintercept=0, linetype=2, color='red')
 print(q)
 dev.off()
@@ -585,29 +611,29 @@ dev.off()
 
 setwd(wue_figures.supplemental.dir)
 # Residual plot of cumulative TE 
-pdf("FIG_S9a.pdf")
+pdf("FIG_S7a.pdf")
 
-p<-ggplot(te_model, aes(x=sv_area, y=te_fit_total, colour=treatment)) + geom_point(size=0.3) + facet_wrap(~dap_i) + scale_color_manual(values=c("orange", "navy")) + theme_bw() + xlab("sv_area") + ylab("model_fit_total")+ theme(legend.position="none")
+p<-ggplot(te_model, aes(x=sv_area, y=te_fit_total, colour=treatment)) + geom_point(size=0.3) + facet_wrap(~dap_i) + scale_color_manual(values=c("orange", "navy")) + theme_bw() + xlab("sv_area") + ylab("model_fit_total")+ theme(legend.position="none",axis.text.x = element_text(angle = 90))
 print(p)
 dev.off()
 
 setwd(wue_figures.supplemental.dir)
 
-pdf("FIG_S9b.pdf")
-p<-ggplot(te_model, aes(x=sv_area_day, y=te_fit_day, colour=treatment)) + geom_point(size=0.3) + facet_wrap(~dap_i) + scale_color_manual(values=c("orange", "navy")) + theme_bw() + xlab("sv_area") + ylab("model_fit_day")+ theme(legend.position="none")
+pdf("FIG_S7b.pdf")
+p<-ggplot(te_model, aes(x=sv_area_day, y=te_fit_day, colour=treatment)) + geom_point(size=0.3) + facet_wrap(~dap_i) + scale_color_manual(values=c("orange", "navy")) + theme_bw() + xlab("sv_area") + ylab("model_fit_day")+ theme(legend.position="none",axis.text.x = element_text(angle = 90))
 print(p)
 dev.off()
 
 setwd(wue_figures.supplemental.dir)
 # Residual plot of cumulative TE 
-pdf("FIG_S10a.pdf")
-p<-ggplot(te_model, aes(x=sv_area, y=te_residual_total, colour=treatment)) + geom_point(size=0.3) + facet_wrap(~dap_i) + scale_color_manual(values=c("orange", "navy")) + theme_bw() + xlab("sv_area") + ylab("model_residual_total")+ theme(legend.position="none")
+pdf("FIG_S8a.pdf")
+p<-ggplot(te_model, aes(x=sv_area, y=te_residual_total, colour=treatment)) + geom_point(size=0.3) + facet_wrap(~dap_i) + scale_color_manual(values=c("orange", "navy")) + theme_bw() + xlab("sv_area") + ylab("model_residual_total")+ theme(legend.position="none",axis.text.x = element_text(angle = 90))
 print(p)
 dev.off()
 
 setwd(wue_figures.supplemental.dir)
-pdf("FIG_S10b.pdf")
-p<-ggplot(te_model, aes(x=sv_area_day, y=te_residual_day, colour=treatment)) + geom_point(size=0.3) + facet_wrap(~dap_i) + scale_color_manual(values=c("orange", "navy")) + theme_bw() + xlab("sv_area") + ylab("model_residual_day")+ theme(legend.position="none")
+pdf("FIG_S8b.pdf")
+p<-ggplot(te_model, aes(x=sv_area_day, y=te_residual_day, colour=treatment)) + geom_point(size=0.3) + facet_wrap(~dap_i) + scale_color_manual(values=c("orange", "navy")) + theme_bw() + xlab("sv_area") + ylab("model_residual_day")+ theme(legend.position="none",axis.text.x = element_text(angle = 90))
 print(p)
 dev.off()
 
@@ -618,7 +644,7 @@ load("ril_heritability.Rdata")
 
 # Plot heritability for each trait on a cumulative and daily basis
 setwd(wue_figures.supplemental.dir)
-pdf("FIG_S11.pdf", width=8, height=4)
+pdf("FIG_S9.pdf", width=8, height=4)
 p<-ggplot(gg.comp.h2, aes(x=dap_i, y=value, color=treatment)) + geom_line(size=2)
 g<-p+ scale_color_manual(values=c("red", "orange", "navy")) + ylab("Broad sense H2") + xlab("Days after planting") + facet_wrap(~trait, ncol=5)
 d<-g +theme_bw() + ylim(0,1) + theme(legend.position="none", axis.text=element_text(size=20), axis.title=element_text(size=24,face="bold"), plot.title = element_text(size = 24, face = "bold"))
@@ -634,7 +660,7 @@ dev.off()
 ## Now plot % of variance explained
 setwd(wue_figures.supplemental.dir)
 
-pdf("FIG_S12.pdf", width = 8, height = 4)
+pdf("FIG_S10.pdf", width = 8, height = 4)
 # Plot cumulative
 p<-ggplot(gg.prop.var, aes(x=dap_i, y=value, color=type)) + geom_line(size=2)
 g<-p+ scale_color_manual(values=c("red", "blue", "purple", "black")) + ylab("% of variance") + xlab("Days after planting") + facet_wrap(~trait)
@@ -669,7 +695,7 @@ dev.off()
 setwd(wue_figures.supplemental.dir)
 
 ## Plot location of all cumulative QTL condensed
-pdf("FIG_S13.pdf")
+pdf("FIG_S12.pdf")
 p<-ggplot() + geom_point(data = t.uni.all_qtl, aes(x = pos, y = prop.var, shape=plot.char, colour=as.character(plot.col), fill=as.character(plot.col)),size=3, alpha=0.5) + geom_blank(data = blank_data, aes(x = x, y = y)) + facet_wrap(~chr, scales = "free_x") + expand_limits(x = 0) + scale_x_continuous(expand = c(0, 0)) + theme_bw() +   scale_shape_manual(values=c(24,25)) 
 print(p + scale_color_manual(values=c("1" = "light green", "2" = "dark green", "3" = "light blue", "4" = "blue", "5" = "yellow", "6" = "orange", "7" = "grey", "8" = "black", "9" = "pink", "10" = "red")) + scale_fill_manual(values=c("1" = "light green", "2" = "dark green", "3" = "light blue", "4" = "blue", "5" = "yellow", "6" = "orange", "7" = "grey", "8" = "black", "9" = "pink", "10" = "red")) + ylab("% Variance")  + xlab("Genome Position") + theme(legend.position = "none"))
 
@@ -678,7 +704,7 @@ dev.off()
 setwd(wue_figures.supplemental.dir)
 
 ## Plot location of all daily QTL
-pdf("FIG_S14.pdf")
+pdf("FIG_S11.pdf")
 p<-ggplot() + geom_point(data = r.all_day.qtl, aes(x = pos, y = prop.var, shape=plot.char, colour=as.character(plot.col), fill=as.character(plot.col)),size=3, alpha=0.5) + geom_blank(data = blank_data, aes(x = x, y = y)) + facet_wrap(~chr, scales = "free_x") + expand_limits(x = 0) + scale_x_continuous(expand = c(0, 0)) + theme_bw() +   scale_shape_manual(values=c(24,25)) 
 print(p + scale_color_manual(values=c("1" = "light green", "2" = "dark green", "3" = "light blue", "4" = "blue", "5" = "yellow", "6" = "orange", "7" = "grey", "8" = "black", "9" = "pink", "10" = "red")) + scale_fill_manual(values=c("1" = "green", "2" = "dark green", "3" = "light blue", "4" = "navy", "5" = "yellow", "6" = "orange", "7" = "grey", "8" = "black", "9" = "pink", "10" = "red")) + ylab("% Variance")  + xlab("Genome Position") + theme(legend.position = "none"))
 
@@ -687,7 +713,7 @@ dev.off()
 setwd(wue_figures.supplemental.dir)
 
 ## Plot location of all daily QTL condensed
-pdf("FIG_S15.pdf")
+pdf("FIG_S13.pdf")
 p<-ggplot() + geom_point(data = d.uni.all_qtl, aes(x = pos, y = prop.var, shape=plot.char, colour=as.character(plot.col), fill=as.character(plot.col)),size=3, alpha=0.5) + geom_blank(data = blank_data, aes(x = x, y = y)) + facet_wrap(~chr, scales = "free_x") + expand_limits(x = 0) + scale_x_continuous(expand = c(0, 0)) + theme_bw() +   scale_shape_manual(values=c(24,25)) 
 print(p + scale_color_manual(values=c("1" = "light green", "2" = "dark green", "3" = "light blue", "4" = "blue", "5" = "yellow", "6" = "orange", "7" = "grey", "8" = "black", "9" = "pink", "10" = "red")) + scale_fill_manual(values=c("1" = "light green", "2" = "dark green", "3" = "light blue", "4" = "blue", "5" = "yellow", "6" = "orange", "7" = "grey", "8" = "black", "9" = "pink", "10" = "red")) + ylab("% Variance")  + xlab("Genome Position") + theme(legend.position = "none"))
 
@@ -696,7 +722,7 @@ dev.off()
 
 setwd(wue_figures.supplemental.dir)
 
-pdf("FIG_S16.pdf")
+pdf("FIG_S14.pdf")
 
 grid.newpage()
 draw.quintuple.venn(area1=length(t.sv_area), 
@@ -749,7 +775,7 @@ setwd(wue_figures.supplemental.dir)
 
 grid.newpage()
 
-pdf("FIG_S17.pdf", width=6, height=6)
+pdf("FIG_S15.pdf", width=6, height=6)
 draw.pairwise.venn(area1=length(t.d.sv_area),
                    area2=length(t.w.sv_area),
                    cross.area=length(intersect(t.d.sv_area, t.w.sv_area)),
@@ -760,7 +786,7 @@ draw.pairwise.venn(area1=length(t.d.sv_area),
                    cat.cex=1.5
 )
 
-dev.off()
+#dev.off()
 
 sv_area.t.dw_both<-intersect(t.d.sv_area, t.w.sv_area)
 sv_area.t.d_only<-t.d.sv_area[!t.d.sv_area %in% t.w.sv_area]
@@ -814,7 +840,7 @@ grid.newpage()
 draw.pairwise.venn(area1=length(t.d.te_fit),
                    area2=length(t.w.te_fit),
                    cross.area=length(intersect(t.d.te_fit, t.w.te_fit)),
-                   c("TE fit (Wet)", "TE fit (Dry)"),
+                   c("WUE fit (Wet)", "WUE fit (Dry)"),
                    fill=c("orange", "navy"),
                    cex=2,
                    cat.just=list(c(0,0),c(1,0)),
@@ -835,7 +861,7 @@ grid.newpage()
 draw.pairwise.venn(area1=length(t.d.te_residual),
                    area2=length(t.w.te_residual),
                    cross.area=length(intersect(t.d.te_residual, t.w.te_residual)),
-                   c("TE residual (Dry)", "TE residual (Wet)"),
+                   c("WUE residual (Dry)", "WUE residual (Wet)"),
                    fill=c("orange", "navy"),
                    cex=2,
                    cat.just=list(c(0,0),c(1,0)),
@@ -858,7 +884,7 @@ te_residual.t.w_only<-t.w.te_residual[!t.w.te_residual %in% t.d.te_residual]
 setwd(wue_figures.supplemental.dir)
 
 grid.newpage()
-pdf("FIG_S18.pdf")
+pdf("FIG_S16.pdf")
 draw.pairwise.venn(area1=length(t.sv_area),
                    area2=length(d.sv_area),
                    cross.area=length(intersect(t.sv_area, d.sv_area)),
@@ -917,7 +943,7 @@ grid.newpage()
 draw.pairwise.venn(area1=length(t.te_fit),
                    area2=length(d.te_fit),
                    cross.area=length(intersect(t.te_fit, d.te_fit)),
-                   c("TE fit total", "TE fit rate"),
+                   c("WUE fit total", "WUE fit rate"),
                    fill=c("black", "grey"),
                    cex=2,
                    cat.cex=1.5
@@ -935,7 +961,7 @@ grid.newpage()
 draw.pairwise.venn(area1=length(t.te_residual),
                    area2=length(d.te_residual),
                    cross.area=length(intersect(t.te_residual, d.te_residual)),
-                   c("TE residual total", "TE residual rate"),
+                   c("WUE residual total", "WUE residual rate"),
                    fill=c("red", "pink"),
                    cex=2,
                    cat.cex=1.5
@@ -957,7 +983,7 @@ load("ril_venn_gxe_qtl_analysis.Rdata")
 setwd(wue_figures.supplemental.dir)
 
 ## Different types of GxE QTL
-pdf("FIG_S19.pdf")
+pdf("FIG_S17.pdf")
 draw.triple.venn(area1=length(comp_diff_snp),
                  area2=length(comp_rel_diff_snp),
                  area3=length(comp_ratio_snp),
@@ -976,7 +1002,7 @@ dev.off()
 ## venn_cumulative_v_gxe_qtl
 setwd(wue_figures.supplemental.dir)
 
-pdf("FIG_S20.pdf")
+pdf("FIG_S18.pdf")
 
 grid.newpage()
 #pdf("Figure_X.pdf")
@@ -1146,7 +1172,7 @@ setwd(wue_figures.supplemental.dir)
 
 ## venn_trait_overlap_of_qtl_found_in_both_cumulative_and_gxe
 
-pdf("FIG_S21.pdf")
+pdf("FIG_S19.pdf")
 
 grid.newpage()
 draw.quintuple.venn(area1=length(total.sv_area.raw.comp_both), 
@@ -1192,7 +1218,7 @@ dev.off()
 ## venn_trait_overlap_of_qtl_found_only_in_gxe
 setwd(wue_figures.supplemental.dir)
 
-pdf("FIG_S22.pdf")
+pdf("FIG_S20.pdf")
 grid.newpage()
 draw.quintuple.venn(area1=length(total.sv_area.comp_only), 
                     area2=length(total.water_lost.comp_only), 
@@ -1313,13 +1339,23 @@ plot(wue_ratio.dry_out.F, wue_ratio.wet_out.F, col=c("gold", "dark orange"), mai
 abline(h=wue_ratio.dry_max.perm.F_slod[1], col=c("orange"), lty=2)
 abline(h=wue_ratio.wet_max.perm.F_slod[1], col=c("red"), lty=2)
 
-plot(te_fit.dry_out.F, te_fit.wet_out.F, col=c("grey80", "black"), main="TE model fit", ylab=c(""))
-abline(h=te_fit.dry_max.perm.F_slod[1], col=c("orange"), lty=2)
-abline(h=te_fit.wet_max.perm.F_slod[1], col=c("red"), lty=2)
+#plot(te_fit.dry_out.F, te_fit.wet_out.F, col=c("grey80", "black"), main="TE model fit", ylab=c(""))
+pdf("WUEfit.pdf")
+#plot(te_fit.dry_out.F, te_fit.wet_out.F, col=c("grey80", "black"), ylab=c(""))
+plot(te_fit.dry_out.F, te_fit.wet_out.F, col=c("grey80", "black"), ylab=c(""), xlab=c(""))
 
-plot(te_residual.dry_out.F, te_residual.wet_out.F, col=c("pink", "red"), main="TE model residual", ylab=c(""))
-abline(h=te_residual.dry_max.perm.F_slod[1], col=c("orange"), lty=2)
+#abline(h=te_fit.dry_max.perm.F_slod[1], col=c("orange"), lty=2)
+abline(h=te_fit.wet_max.perm.F_slod[1], col=c("red"), lty=2)
+dev.off()
+
+#plot(te_residual.dry_out.F, te_residual.wet_out.F, col=c("pink", "red"), main="TE model residual", ylab=c(""))
+pdf("WUEresidual.pdf")
+#plot(te_residual.dry_out.F, te_residual.wet_out.F, col=c("pink", "red"), ylab=c(""))
+plot(te_residual.dry_out.F, te_residual.wet_out.F, col=c("pink", "red"), ylab=c(""), xlab=c(""))
+
+#abline(h=te_residual.dry_max.perm.F_slod[1], col=c("orange"), lty=2)
 abline(h=te_residual.wet_max.perm.F_slod[1], col=c("red"), lty=2)
+dev.off()
 
 dev.off()
 
@@ -1328,7 +1364,7 @@ dev.off()
 
 setwd(wue_figures.supplemental.dir)
 
-pdf("FIG_S23.pdf", width=8, height = 3)
+pdf("FIG_S21.pdf", width=8, height = 3)
 par(mfrow = c(1, 5))  # 1 row and 5 columns
 
 plotLodProfile(sv_area.dry_slod, col=c("green"), main="Plant size", showallchr=T)
@@ -1349,11 +1385,11 @@ plotLodProfile(te_residual.dry_slod, col=c("pink"), add=T, showallchr=T, ylab=""
 dev.off()
 
 
-## Lets make Figure S24
+## Lets make Figure S25
 ## Rate traits using stepwise SLOD
 setwd(wue_figures.supplemental.dir)
 
-pdf("FIG_S24.pdf", width=8, height = 3)
+pdf("FIG_S22.pdf", width=8, height = 3)
 par(mfrow = c(1, 5))  # 1 row and 5 columns
 
 plotLodProfile(sv_area.wet_slod, col=c("dark green"), main="Plant size", showallchr=T)
@@ -1373,11 +1409,11 @@ plotLodProfile(te_residual.wet_slod, col=c("red"), add=T, showallchr=T, ylab="")
 
 dev.off()
 
-## Lets make Figure S25
+## Lets make Figure S26
 ## Rate traits using scanone SLOD
 setwd(wue_figures.supplemental.dir)
 
-pdf("FIG_S25.pdf", width=8, height = 3)
+pdf("FIG_S23.pdf", width=8, height = 3)
 par(mfrow = c(1, 5))  # 1 row and 5 columns
 
 plot(sv_area.dry_out.F, sv_area.wet_out.F, col=c("green", "dark green"), main="Plant size", ylab=c("LOD score"))
@@ -1508,7 +1544,7 @@ for (i in 2:20) wss[i] <- sum(kmeans(t(r.all_total.qtl.clust.mat),
                                      centers=i)$withinss)
 setwd(wue_figures.supplemental.dir)
 
-pdf("FIG_S26.pdf")
+pdf("FIG_S24.pdf")
 plot(1:20, wss, type="b", xlab="Number of Clusters",
      ylab="Within groups sum of squares")
 dev.off()
@@ -1610,7 +1646,7 @@ p5<-p5 + geom_hline(yintercept=0, color="brown",linetype="dashed")
 setwd(wue_figures.supplemental.dir)
 
 ## Plot QTL where B100 allele gives positive FX
-pdf("FIG_S27a.pdf")
+pdf("FIG_S25a.pdf")
 multiplot(p1, p2, p3, p4, p5, nrow = 5)
 dev.off()
 
@@ -1629,7 +1665,7 @@ p5<-p5 + geom_hline(yintercept=0, color="brown",linetype="dashed")
 setwd(wue_figures.supplemental.dir)
 ## Plot QTL where B100 allele gives negative FX
 
-pdf("FIG_S27b.pdf")
+pdf("FIG_S25b.pdf")
 multiplot(p1, p2, p3, p4, p5, nrow = 5)
 dev.off()
 
@@ -1727,7 +1763,7 @@ col_breaks = c(seq(-100,0,length=1),  # for yellow
                seq(1.000001,5,length=48), # for red
                seq(5.01,1000, length=1)) # extreme red
 
-pdf("FIG_S28.pdf")
+pdf("FIG_S26.pdf")
 
 heatmap.2(sv_area.ratio,  notecol="black", col=my_palette, Colv="NA", Rowv="NA", trace="none", dendrogram = c("none"), density.info="none", key=F, breaks=col_breaks, symm=F,symkey=F,symbreaks=T, main="Plant size", xlab="Days after planting")
 
@@ -1735,9 +1771,9 @@ heatmap.2(water_lost.ratio,  notecol="black", col=my_palette, Colv="NA", Rowv="N
 
 heatmap.2(wue_ratio.ratio,  notecol="black", col=my_palette, Colv="NA", Rowv="NA", trace="none", dendrogram = c("none"), density.info="none", key=F, breaks=col_breaks, symm=F,symkey=F,symbreaks=T, main="WUE ratio", xlab="Days after planting")
 
-heatmap.2(te_fit.ratio,  notecol="black", col=my_palette, Colv="NA", Rowv="NA", trace="none", dendrogram = c("none"), density.info="none", key=F, breaks=col_breaks, symm=F,symkey=F,symbreaks=T, main="TE fit", xlab="Days after planting")
+heatmap.2(te_fit.ratio,  notecol="black", col=my_palette, Colv="NA", Rowv="NA", trace="none", dendrogram = c("none"), density.info="none", key=F, breaks=col_breaks, symm=F,symkey=F,symbreaks=T, main="WUE fit", xlab="Days after planting")
 
-heatmap.2(te_residual.ratio,  notecol="black", col=my_palette, Colv="NA", Rowv="NA", trace="none", dendrogram = c("none"), density.info="none", key=F, breaks=col_breaks, symm=F,symkey=F,symbreaks=T, main="TE residual", xlab="Days after planting")
+heatmap.2(te_residual.ratio,  notecol="black", col=my_palette, Colv="NA", Rowv="NA", trace="none", dendrogram = c("none"), density.info="none", key=F, breaks=col_breaks, symm=F,symkey=F,symbreaks=T, main="WUE residual", xlab="Days after planting")
 
 dev.off()
 
